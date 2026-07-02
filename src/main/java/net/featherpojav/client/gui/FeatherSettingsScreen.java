@@ -170,6 +170,11 @@ public class FeatherSettingsScreen extends Screen {
     }
     
     @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        // Do nothing to prevent background blur
+    }
+    
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // Handle Sidebar Category Clicks
         int categoryY = 50;
