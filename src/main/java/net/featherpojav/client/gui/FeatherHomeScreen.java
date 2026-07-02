@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FeatherHomeScreen extends Screen {
-    public static final CubeMapRenderer CUSTOM_PANORAMA = new CubeMapRenderer(Identifier.of("featherpojav", "background/panorama"));
+    public static final CubeMapRenderer CUSTOM_PANORAMA = new CubeMapRenderer(Identifier.of("featherpojav", "textures/background/panorama"));
     private final RotatingCubeMapRenderer panoramaRenderer = new RotatingCubeMapRenderer(CUSTOM_PANORAMA);
 
     private final List<MenuButton> buttons = new ArrayList<>();
