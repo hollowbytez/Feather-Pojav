@@ -149,6 +149,8 @@ public class FeatherConfig {
     public float crosshairSize = 5.0f;
     public float crosshairThickness = 1.0f;
     public float crosshairGap = 2.0f;
+    public int crosshairPreset = 0;
+    public float zoomMagnification = 4.0f;
     
     public long timeChangerTicks = 6000;
     public float particleMultiplier = 1.0f;

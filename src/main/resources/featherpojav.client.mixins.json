@@ -12,7 +12,9 @@
 		"CameraMixin",
 		"WorldMixin",
 		"SessionMixin",
-		"BossBarHudMixin"
+		"BossBarHudMixin",
+		"LightmapTextureManagerMixin",
+		"LightmapTextureManagerAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

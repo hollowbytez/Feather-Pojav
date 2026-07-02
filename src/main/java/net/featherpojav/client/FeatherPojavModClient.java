@@ -201,19 +201,9 @@ public class FeatherPojavModClient implements ClientModInitializer {
                 }
             }
 
-            // Handle Fullbright status (gamma option override)
-            if (client.options != null && client.options.getGamma() != null) {
-                if (FeatherConfig.INSTANCE.fullbright) {
-                    if (originalGamma == -1.0) {
-                        originalGamma = client.options.getGamma().getValue();
-                    }
-                    client.options.getGamma().setValue(15.0);
-                } else {
-                    if (originalGamma != -1.0) {
-                        client.options.getGamma().setValue(originalGamma);
-                        originalGamma = -1.0;
-                    }
-                }
+            // Force lightmap update so Fullbright applies instantly in-game
+            if (client.gameRenderer != null && client.gameRenderer.getLightmapTextureManager() != null) {
+                ((net.featherpojav.mixin.client.LightmapTextureManagerAccessor) client.gameRenderer.getLightmapTextureManager()).setDirty(true);
             }
         });
 

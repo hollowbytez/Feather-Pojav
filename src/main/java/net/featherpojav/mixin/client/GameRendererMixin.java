@@ -1,6 +1,7 @@
 package net.featherpojav.mixin.client;
 
 import net.featherpojav.client.FeatherPojavModClient;
+import net.featherpojav.client.config.FeatherConfig;
 import net.featherpojav.client.gui.FeatherHomeScreen;
 import net.featherpojav.client.gui.FeatherSettingsScreen;
 import net.featherpojav.client.gui.FeatherGameMenuScreen;
@@ -24,7 +25,7 @@ public class GameRendererMixin {
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
     private void onGetFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
         if (FeatherPojavModClient.isZooming) {
-            FeatherPojavModClient.targetZoomLevel = 4.0f;
+            FeatherPojavModClient.targetZoomLevel = FeatherConfig.INSTANCE.zoomMagnification;
         } else {
             FeatherPojavModClient.targetZoomLevel = 1.0f;
         }

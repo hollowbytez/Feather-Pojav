@@ -1,6 +1,9 @@
 package net.featherpojav.client.gui;
 
 import net.featherpojav.client.config.FeatherConfig;
+import net.featherpojav.client.FeatherPojavModClient;
+import net.minecraft.client.util.InputUtil;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -99,7 +102,10 @@ public class FeatherSettingsScreen extends Screen {
         cards.add(new ModCard("Reach Display", "📏", Category.HUD, () -> cfg.reachDisplay, (v) -> cfg.reachDisplay = v));
         cards.add(new ModCard("Server IP", "🌐", Category.HUD, () -> cfg.serverAddress, (v) -> cfg.serverAddress = v));
         cards.add(new ModCard("Speed Meter", "👟", Category.HUD, () -> cfg.speedMeter, (v) -> cfg.speedMeter = v));
-        cards.add(new ModCard("Stopwatch", "⏱", Category.HUD, () -> cfg.stopwatch, (v) -> cfg.stopwatch = v));
+        cards.add(new ModCard("Stopwatch", "⏱", Category.HUD, () -> cfg.stopwatch, (v) -> cfg.stopwatch = v)
+            .withConfig(() -> {
+                if (this.client != null) this.client.setScreen(new FeatherKeybindSettingScreen(this, "Stopwatch", FeatherPojavModClient.stopwatchKey));
+            }));
         cards.add(new ModCard("Item Counter", "📦", Category.HUD, () -> cfg.itemCounter, (v) -> cfg.itemCounter = v));
         cards.add(new ModCard("Armor Bar", "🛡", Category.HUD, () -> cfg.armorBar, (v) -> cfg.armorBar = v));
         cards.add(new ModCard("Armor Status", "🛡", Category.HUD, () -> cfg.armorStatus, (v) -> cfg.armorStatus = v));
@@ -109,9 +115,18 @@ public class FeatherSettingsScreen extends Screen {
         cards.add(new ModCard("Scoreboard", "📋", Category.HUD, () -> cfg.scoreboard, (v) -> cfg.scoreboard = v));
 
         // --- PvP Category ---
-        cards.add(new ModCard("ToggleSprint", "🏃", Category.PVP, () -> cfg.toggleSprint, (v) -> cfg.toggleSprint = v));
-        cards.add(new ModCard("Zoom", "🔍", Category.PVP, () -> cfg.zoom, (v) -> cfg.zoom = v));
-        cards.add(new ModCard("Freelook", "👁", Category.PVP, () -> cfg.freelook, (v) -> cfg.freelook = v));
+        cards.add(new ModCard("ToggleSprint", "🏃", Category.PVP, () -> cfg.toggleSprint, (v) -> cfg.toggleSprint = v)
+            .withConfig(() -> {
+                if (this.client != null) this.client.setScreen(new FeatherKeybindSettingScreen(this, "ToggleSprint", FeatherPojavModClient.toggleSprintKey));
+            }));
+        cards.add(new ModCard("Zoom", "🔍", Category.PVP, () -> cfg.zoom, (v) -> cfg.zoom = v)
+            .withConfig(() -> {
+                if (this.client != null) this.client.setScreen(new FeatherZoomScreen(this));
+            }));
+        cards.add(new ModCard("Freelook", "👁", Category.PVP, () -> cfg.freelook, (v) -> cfg.freelook = v)
+            .withConfig(() -> {
+                if (this.client != null) this.client.setScreen(new FeatherKeybindSettingScreen(this, "Freelook", FeatherPojavModClient.freelookKey));
+            }));
         cards.add(new ModCard("AutoGG", "🗣", Category.PVP, () -> cfg.autoGG, (v) -> cfg.autoGG = v));
         cards.add(new ModCard("Hit Color", "⚔", Category.PVP, () -> cfg.animations, (v) -> cfg.animations = v));
         cards.add(new ModCard("Hitbox outlines", "📦", Category.PVP, () -> cfg.hitbox, (v) -> cfg.hitbox = v));
@@ -436,6 +451,8 @@ public class FeatherSettingsScreen extends Screen {
 class FeatherAutoTextScreen extends Screen {
     private final Screen parent;
     private TextFieldWidget inputField;
+    private boolean listening = false;
+    private ButtonWidget bindButton;
 
     protected FeatherAutoTextScreen(Screen parent) {
         super(Text.of("Auto Text Settings"));
@@ -444,25 +461,66 @@ class FeatherAutoTextScreen extends Screen {
 
     @Override
     protected void init() {
-        // Centered input field
-        inputField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, this.height / 2 - 20, 200, 20, Text.of("Edit Macro Command"));
+        int cx = this.width / 2;
+        int cy = this.height / 2;
+
+        // Centered input field for macro
+        inputField = new TextFieldWidget(this.textRenderer, cx - 100, cy - 35, 200, 20, Text.of("Edit Macro Command"));
         inputField.setMaxLength(128);
         inputField.setText(FeatherConfig.INSTANCE.autoTextCommand);
         this.addSelectableChild(inputField);
+
+        // Keybind configuration button
+        bindButton = ButtonWidget.builder(Text.of(getKeyNameText()), button -> {
+            listening = true;
+            button.setMessage(Text.of("Press any key..."));
+        }).dimensions(cx - 100, cy - 5, 200, 20).build();
+        this.addDrawableChild(bindButton);
 
         // Save & Back button
         this.addDrawableChild(ButtonWidget.builder(Text.of("Save & Back"), button -> {
             FeatherConfig.INSTANCE.autoTextCommand = inputField.getText();
             FeatherConfig.save();
             if (this.client != null) this.client.setScreen(parent);
-        }).dimensions(this.width / 2 - 50, this.height / 2 + 10, 100, 20).build());
+        }).dimensions(cx - 50, cy + 25, 100, 20).build());
+    }
+
+    private String getKeyNameText() {
+        return "Keybind: " + FeatherPojavModClient.autoTextKey.getBoundKeyTranslationKey().replace("key.keyboard.", "").toUpperCase();
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (listening) {
+            listening = false;
+            if (keyCode != GLFW.GLFW_KEY_ESCAPE) {
+                FeatherPojavModClient.autoTextKey.setBoundKey(InputUtil.fromKeyCode(keyCode, scanCode));
+                if (this.client != null && this.client.options != null) {
+                    this.client.options.write();
+                }
+            }
+            bindButton.setMessage(Text.of(getKeyNameText()));
+            return true;
+        }
+        if (inputField.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (inputField.charTyped(chr, modifiers)) {
+            return true;
+        }
+        return super.charTyped(chr, modifiers);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         context.fill(0, 0, this.width, this.height, 0xD0141416);
-        context.drawCenteredTextWithShadow(this.textRenderer, "AUTO TEXT MACRO CONFIG", this.width / 2, this.height / 2 - 50, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer, "Binds to 'U' key in game", this.width / 2, this.height / 2 - 38, 0xFF888888);
+        context.drawCenteredTextWithShadow(this.textRenderer, "AUTO TEXT MACRO CONFIG", this.width / 2, this.height / 2 - 65, 0xFFFFFFFF);
+        context.drawCenteredTextWithShadow(this.textRenderer, "Edit the command macro and click the keybind button to customize.", this.width / 2, this.height / 2 - 50, 0xFFBA68C8);
         inputField.render(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
     }
@@ -538,10 +596,50 @@ class FeatherCrosshairScreen extends Screen {
         this.parent = parent;
     }
 
+    private static final int[] COLORS = {0xFF00FF00, 0xFFFF0000, 0xFF00BFFF, 0xFFFFFF00, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFFFF, 0xFFFF8C00, 0xFFFF69B4};
+    private static final String[] COLOR_NAMES = {"Green", "Red", "Blue", "Yellow", "Cyan", "Magenta", "White", "Orange", "Pink"};
+
+    private String getPresetButtonText() {
+        String[] presets = {"Cross", "Dot", "Circle", "Circle/Dot", "T-Shape", "X-Shape", "Square", "Chevron", "Tri-Bar", "Box/Dot"};
+        int p = FeatherConfig.INSTANCE.crosshairPreset;
+        if (p < 0 || p >= presets.length) p = 0;
+        return "Style: " + presets[p];
+    }
+
+    private void cyclePreset(ButtonWidget button) {
+        FeatherConfig.INSTANCE.crosshairPreset = (FeatherConfig.INSTANCE.crosshairPreset + 1) % 10;
+        FeatherConfig.save();
+        button.setMessage(Text.of(getPresetButtonText()));
+    }
+
+    private String getColorButtonText() {
+        int color = FeatherConfig.INSTANCE.crosshairColor;
+        for (int i = 0; i < COLORS.length; i++) {
+            if (COLORS[i] == color) {
+                return "Color: " + COLOR_NAMES[i];
+            }
+        }
+        return "Color: Custom";
+    }
+
+    private void cycleColor(ButtonWidget button) {
+        int color = FeatherConfig.INSTANCE.crosshairColor;
+        int nextIndex = 0;
+        for (int i = 0; i < COLORS.length; i++) {
+            if (COLORS[i] == color) {
+                nextIndex = (i + 1) % COLORS.length;
+                break;
+            }
+        }
+        FeatherConfig.INSTANCE.crosshairColor = COLORS[nextIndex];
+        FeatherConfig.save();
+        button.setMessage(Text.of(getColorButtonText()));
+    }
+
     @Override
     protected void init() {
         int leftX = this.width / 2 - 95;
-        int startY = this.height / 2 - 35;
+        int startY = this.height / 2 - 40;
 
         // Size adjustment
         this.addDrawableChild(ButtonWidget.builder(Text.of("Size +"), button -> adjustSize(0.5f)).dimensions(leftX, startY, 90, 20).build());
@@ -555,10 +653,14 @@ class FeatherCrosshairScreen extends Screen {
         this.addDrawableChild(ButtonWidget.builder(Text.of("Thickness +"), button -> adjustTh(0.5f)).dimensions(leftX, startY + 50, 90, 20).build());
         this.addDrawableChild(ButtonWidget.builder(Text.of("Thickness -"), button -> adjustTh(-0.5f)).dimensions(leftX + 100, startY + 50, 90, 20).build());
 
+        // Preset and Color cycling
+        this.addDrawableChild(ButtonWidget.builder(Text.of(getPresetButtonText()), button -> cyclePreset(button)).dimensions(leftX, startY + 75, 90, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.of(getColorButtonText()), button -> cycleColor(button)).dimensions(leftX + 100, startY + 75, 90, 20).build());
+
         // Back button
         this.addDrawableChild(ButtonWidget.builder(Text.of("Back"), button -> {
             if (this.client != null) this.client.setScreen(parent);
-        }).dimensions(this.width / 2 - 45, startY + 80, 90, 20).build());
+        }).dimensions(this.width / 2 - 45, startY + 105, 90, 20).build());
     }
 
     private void adjustSize(float val) {
@@ -592,10 +694,69 @@ class FeatherCrosshairScreen extends Screen {
         float size = cfg.crosshairSize;
         float th = cfg.crosshairThickness;
         int color = cfg.crosshairColor;
-        context.fill((int)(cx - gap - size), (int)(cy - th/2), (int)(cx - gap), (int)(cy + th/2 + 0.5f), color);
-        context.fill((int)(cx + gap), (int)(cy - th/2), (int)(cx + gap + size), (int)(cy + th/2 + 0.5f), color);
-        context.fill((int)(cx - th/2), (int)(cy - gap - size), (int)(cx + th/2 + 0.5f), (int)(cy - gap), color);
-        context.fill((int)(cx - th/2), (int)(cy + gap), (int)(cx + th/2 + 0.5f), (int)(cy + gap + size), color);
+        int preset = cfg.crosshairPreset;
+
+        switch (preset) {
+            case 1: // Dot
+                context.fill((int) (cx - th / 2.0f), (int) (cy - th / 2.0f), (int) (cx + th / 2.0f + 0.5f), (int) (cy + th / 2.0f + 0.5f), color);
+                break;
+            case 2: // Circle
+            case 3: // Circle with Dot
+                int radius = (int)(gap + size);
+                for (int angle = 0; angle < 360; angle += 15) {
+                    double rad = Math.toRadians(angle);
+                    int px = (int)(cx + Math.cos(rad) * radius);
+                    int py = (int)(cy + Math.sin(rad) * radius);
+                    context.fill((int)(px - th/2.0f), (int)(py - th/2.0f), (int)(px + th/2.0f + 0.5f), (int)(py + th/2.0f + 0.5f), color);
+                }
+                if (preset == 3) {
+                    context.fill((int) (cx - th / 2.0f), (int) (cy - th / 2.0f), (int) (cx + th / 2.0f + 0.5f), (int) (cy + th / 2.0f + 0.5f), color);
+                }
+                break;
+            case 4: // T-Shape
+                context.fill((int) (cx - gap - size), (int) (cy - th / 2.0f), (int) (cx - gap), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx + gap), (int) (cy - th / 2.0f), (int) (cx + gap + size), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx - th / 2.0f), (int) (cy + gap), (int) (cx + th / 2.0f + 0.5f), (int) (cy + gap + size), color);
+                break;
+            case 5: // X-Shape
+                float offset = gap;
+                for (int idx = 0; idx < size; idx++) {
+                    float f = offset + idx;
+                    context.fill((int)(cx - f - th/2), (int)(cy - f - th/2), (int)(cx - f + th/2 + 0.5f), (int)(cy - f + th/2 + 0.5f), color);
+                    context.fill((int)(cx + f - th/2), (int)(cy - f - th/2), (int)(cx + f + th/2 + 0.5f), (int)(cy - f + th/2 + 0.5f), color);
+                    context.fill((int)(cx - f - th/2), (int)(cy + f - th/2), (int)(cx - f + th/2 + 0.5f), (int)(cy + f + th/2 + 0.5f), color);
+                    context.fill((int)(cx + f - th/2), (int)(cy + f - th/2), (int)(cx + f + th/2 + 0.5f), (int)(cy + f + th/2 + 0.5f), color);
+                }
+                break;
+            case 6: // Square
+            case 9: // Box with Dot
+                int r = (int)(gap + size);
+                context.fill((int)(cx - r), (int)(cy - r - th/2), (int)(cx + r), (int)(cy - r + th/2 + 0.5f), color);
+                context.fill((int)(cx - r), (int)(cy + r - th/2), (int)(cx + r), (int)(cy + r + th/2 + 0.5f), color);
+                context.fill((int)(cx - r - th/2), (int)(cy - r), (int)(cx - r + th/2 + 0.5f), (int)(cy + r), color);
+                context.fill((int)(cx + r - th/2), (int)(cy - r), (int)(cx + r + th/2 + 0.5f), (int)(cy + r), color);
+                if (preset == 9) {
+                    context.fill((int) (cx - th / 2.0f), (int) (cy - th / 2.0f), (int) (cx + th / 2.0f + 0.5f), (int) (cy + th / 2.0f + 0.5f), color);
+                }
+                break;
+            case 7: // Arrow / Chevron
+                for (int idx = 0; idx < size; idx++) {
+                    context.fill((int)(cx - idx - th/2), (int)(cy - gap + idx - th/2), (int)(cx - idx + th/2 + 0.5f), (int)(cy - gap + idx + th/2 + 0.5f), color);
+                    context.fill((int)(cx + idx - th/2), (int)(cy - gap + idx - th/2), (int)(cx + idx + th/2 + 0.5f), (int)(cy - gap + idx + th/2 + 0.5f), color);
+                }
+                break;
+            case 8: // Tri-Bar
+                context.fill((int) (cx - gap - size), (int) (cy - th / 2.0f), (int) (cx - gap), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx + gap), (int) (cy - th / 2.0f), (int) (cx + gap + size), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx - th / 2.0f), (int) (cy - gap - size), (int) (cx + th / 2.0f + 0.5f), (int) (cy - gap), color);
+                break;
+            default: // 0: Classic Cross
+                context.fill((int) (cx - gap - size), (int) (cy - th / 2.0f), (int) (cx - gap), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx + gap), (int) (cy - th / 2.0f), (int) (cx + gap + size), (int) (cy + th / 2.0f + 0.5f), color);
+                context.fill((int) (cx - th / 2.0f), (int) (cy - gap - size), (int) (cx + th / 2.0f + 0.5f), (int) (cy - gap), color);
+                context.fill((int) (cx - th / 2.0f), (int) (cy + gap), (int) (cx + th / 2.0f + 0.5f), (int) (cy + gap + size), color);
+                break;
+        }
 
         super.render(context, mouseX, mouseY, delta);
     }
