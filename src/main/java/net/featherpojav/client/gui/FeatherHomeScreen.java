@@ -1,5 +1,6 @@
 package net.featherpojav.client.gui;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.featherpojav.client.config.FeatherConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -54,22 +55,30 @@ public class FeatherHomeScreen extends Screen {
         buttons.clear();
         topIcons.clear();
 
-        // Center Buttons matching original Title Screen
+        // 1. Singleplayer
         buttons.add(new MenuButton("👤", "Singleplayer", false, () -> {
             if (this.client != null) this.client.setScreen(new SelectWorldScreen(this));
         }));
+        
+        // 2. Multiplayer
         buttons.add(new MenuButton("👥", "Multiplayer", false, () -> {
             if (this.client != null) this.client.setScreen(new MultiplayerScreen(this));
         }));
-        buttons.add(new MenuButton("★", "Partnered Servers", false, () -> {
-            Util.getOperatingSystem().open("https://feather.gg");
-        }));
-        buttons.add(new MenuButton("👕", "Cosmetics", false, () -> {
-            if (this.client != null) {
-                FeatherSettingsScreen s = new FeatherSettingsScreen(this);
-                this.client.setScreen(s);
-            }
-        }));
+
+        // 3. Mods (only if Mod Menu is loaded by the user)
+        if (FabricLoader.getInstance().isModLoaded("modmenu")) {
+            buttons.add(new MenuButton("🧩", "Mods", false, () -> {
+                try {
+                    Class<?> screenClass = Class.forName("com.terraformersmc.modmenu.gui.ModsScreen");
+                    Screen modsScreen = (Screen) screenClass.getConstructor(Screen.class).newInstance(this);
+                    if (this.client != null) this.client.setScreen(modsScreen);
+                } catch (Exception e) {
+                    if (this.client != null) this.client.setScreen(new FeatherSettingsScreen(this));
+                }
+            }));
+        }
+
+        // 4. STORE
         buttons.add(new MenuButton("🛒", "STORE", true, () -> {
             Util.getOperatingSystem().open("https://store.feather.gg");
         }));
@@ -95,11 +104,15 @@ public class FeatherHomeScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Draw custom dark violet gradient background (completely eliminates background blur!)
-        context.fillGradient(0, 0, this.width, this.height, 0xFF120E1C, 0xFF050508);
+        // Draw the custom starry night background image
+        Identifier backgroundId = Identifier.of("featherpojav", "background.png");
+        context.drawTexture(backgroundId, 0, 0, 0.0f, 0.0f, this.width, this.height, this.width, this.height);
+
+        // Dark grey atmospheric overlay for visual contrast
+        context.fill(0, 0, this.width, this.height, 0x80101012);
 
         // --- Render Center Header & Brand ---
-        int centerY = this.height / 2 - 120;
+        int centerY = this.height / 2 - 110;
         Identifier logoId = Identifier.of("featherpojav", "icon.png");
         context.drawTexture(logoId, this.width / 2 - 60, centerY, 0.0f, 0.0f, 20, 20, 96, 96);
         context.drawText(this.textRenderer, "FEATHER CLIENT", this.width / 2 - 35, centerY + 6, 0xFFFFFFFF, true);
@@ -176,16 +189,18 @@ public class FeatherHomeScreen extends Screen {
         String versionStr = "Feather fabric-loader-0.17.3-1.21.1 (release/hollowbytez)";
         context.drawText(this.textRenderer, versionStr, 15, this.height - 18, 0x80FFFFFF, false);
 
-        // --- Render Bottom Right Cosmetics Ad Widget ---
+        // --- Render Bottom Right GitHub Panel ---
         int adWidth = 140;
         int adHeight = 45;
         int adX = this.width - adWidth - 15;
         int adY = this.height - adHeight - 15;
-        context.fill(adX, adY, adX + adWidth, adY + adHeight, 0xFF141416);
-        context.drawBorder(adX, adY, adWidth, adHeight, 0xFF9C27B0);
-        context.drawText(this.textRenderer, "GAMER COLLECTION", adX + 8, adY + 8, 0xFF9C27B0, true);
-        context.drawText(this.textRenderer, "Premium Capes & Wings", adX + 8, adY + 22, 0xFFCCCCCC, false);
-        context.drawText(this.textRenderer, "Active Store Link in Menu", adX + 8, adY + 32, 0xFF888888, false);
+        
+        boolean gitHovered = mouseX >= adX && mouseX <= adX + adWidth && mouseY >= adY && mouseY <= adY + adHeight;
+        context.fill(adX, adY, adX + adWidth, adY + adHeight, gitHovered ? 0xFF221133 : 0xFF14121A);
+        context.drawBorder(adX, adY, adWidth, adHeight, gitHovered ? 0xFFD050FF : 0xFF9C27B0);
+        context.drawText(this.textRenderer, "OWNER GITHUB", adX + 8, adY + 8, 0xFF9C27B0, true);
+        context.drawText(this.textRenderer, "github.com/hollowbytez", adX + 8, adY + 22, 0xFFCCCCCC, false);
+        context.drawText(this.textRenderer, "Click to visit profile", adX + 8, adY + 32, 0xFF888888, false);
 
         super.render(context, mouseX, mouseY, delta);
     }
@@ -193,7 +208,7 @@ public class FeatherHomeScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // Handle Main buttons clicks
-        int centerY = this.height / 2 - 120;
+        int centerY = this.height / 2 - 110;
         int buttonY = centerY + 30;
         int buttonWidth = 190;
         int buttonHeight = 24;
@@ -216,7 +231,7 @@ public class FeatherHomeScreen extends Screen {
 
         // Handle Top Right Shortcuts clicks
         if (this.client != null && this.client.getSession() != null) {
-            int rightX = this.width - 225;
+            int rightX = Math.max(this.width / 2 + 105, this.width - 225);
             int topY = 15;
             int iconX = rightX + 115;
 
@@ -227,6 +242,16 @@ public class FeatherHomeScreen extends Screen {
                 }
                 iconX += 26;
             }
+        }
+
+        // Handle Bottom Right GitHub Box click
+        int adWidth = 140;
+        int adHeight = 45;
+        int adX = this.width - adWidth - 15;
+        int adY = this.height - adHeight - 15;
+        if (mouseX >= adX && mouseX <= adX + adWidth && mouseY >= adY && mouseY <= adY + adHeight) {
+            Util.getOperatingSystem().open("https://github.com/hollowbytez");
+            return true;
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
