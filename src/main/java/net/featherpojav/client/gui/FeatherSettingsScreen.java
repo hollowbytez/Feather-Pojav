@@ -292,8 +292,8 @@ public class FeatherSettingsScreen extends Screen {
             secX += btnS + 8;
         }
 
-        // "FeatherClient" branding - normal kerning, left-aligned after icons
-        context.drawText(this.textRenderer, "FeatherClient", secX + 6, navY + (navBarH - 8) / 2, ACCENT_RED, true);
+        // "HollowClient" branding - normal kerning, left-aligned after icons
+        context.drawText(this.textRenderer, "HollowClient", secX + 6, navY + (navBarH - 8) / 2, ACCENT_RED, true);
 
         // Username (right side)
         if (this.client != null && this.client.getSession() != null) {

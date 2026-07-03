@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "featherpojav",
 	"version": "${version}",
-	"name": "Feather Pojav",
-	"description": "Feather Client recreation for PojavLauncher and cracked/offline Minecraft accounts.",
+	"name": "HollowClient",
+	"description": "HollowClient - A premium PvP client for Minecraft 1.21.1.",
 	"authors": [
 		"HollowBytez"
 	],

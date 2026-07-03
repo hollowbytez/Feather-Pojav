@@ -26,7 +26,7 @@ public class FeatherHomeScreen extends Screen {
     private final List<IconWidget> topIcons = new ArrayList<>();
 
     public FeatherHomeScreen() {
-        super(Text.of("Feather Home Screen"));
+        super(Text.of("Hollow Home Screen"));
     }
 
     private static class MenuButton {
@@ -112,12 +112,16 @@ public class FeatherHomeScreen extends Screen {
         // Dark grey atmospheric overlay for visual contrast (D0 is 80% opacity)
         context.fill(0, 0, this.width, this.height, 0xD0101012);
 
-        // --- Render Center Header & Brand (using new custom title logo) ---
+        // --- Render Center Header & Brand (HollowClient H logo) ---
         int centerY = this.height / 2 - 115;
-        int logoW = 160;
-        int logoH = 90;
+        int logoW = 80;
+        int logoH = 80;
         Identifier logoId = Identifier.of("featherpojav", "textures/title.png");
-        context.drawTexture(logoId, this.width / 2 - logoW / 2, centerY - 50, 0.0f, 0.0f, logoW, logoH, 3264, 1836);
+        context.drawTexture(logoId, this.width / 2 - logoW / 2, centerY - 60, 0.0f, 0.0f, logoW, logoH, 1024, 1024);
+        // "HollowClient" text branding below logo
+        String brand = "HollowClient";
+        int brandW = this.textRenderer.getWidth(brand);
+        context.drawText(this.textRenderer, brand, this.width / 2 - brandW / 2, centerY + 24, 0xFFEB4040, true);
 
         // --- Render Center Main Buttons ---
         int buttonY = centerY + 45;
@@ -188,7 +192,7 @@ public class FeatherHomeScreen extends Screen {
         }
 
         // --- Render Bottom Left Version Info ---
-        String versionStr = "Feather fabric-loader-0.17.3-1.21.1 (release/hollowbytez)";
+        String versionStr = "HollowClient fabric-loader-0.17.3-1.21.1 (release/hollowbytez)";
         context.drawText(this.textRenderer, versionStr, 15, this.height - 18, 0x80FFFFFF, false);
 
         // --- Render Bottom Right GitHub Panel ---

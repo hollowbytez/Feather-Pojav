@@ -153,7 +153,7 @@ public class FeatherPojavModClient implements ClientModInitializer {
                 while (autoTextKey.wasPressed()) {
                     if (client.player.networkHandler != null) {
                         client.player.networkHandler.sendChatMessage(FeatherConfig.INSTANCE.autoTextCommand);
-                        client.player.sendMessage(Text.of("§a[Feather] Executed Auto Text Macro (" + FeatherConfig.INSTANCE.autoTextCommand + ")"), true);
+                        client.player.sendMessage(Text.of("§a[Hollow] Executed Auto Text Macro (" + FeatherConfig.INSTANCE.autoTextCommand + ")"), true);
                     }
                 }
             }
@@ -162,7 +162,7 @@ public class FeatherPojavModClient implements ClientModInitializer {
             while (toggleSprintKey.wasPressed()) {
                 FeatherConfig.INSTANCE.toggleSprint = !FeatherConfig.INSTANCE.toggleSprint;
                 FeatherConfig.save();
-                client.player.sendMessage(Text.of("§a[Feather] Toggle Sprint: " + (FeatherConfig.INSTANCE.toggleSprint ? "§2Enabled" : "§4Disabled")), true);
+                client.player.sendMessage(Text.of("§a[Hollow] Toggle Sprint: " + (FeatherConfig.INSTANCE.toggleSprint ? "§2Enabled" : "§4Disabled")), true);
             }
 
             // Handle Zoom status
@@ -214,7 +214,7 @@ public class FeatherPojavModClient implements ClientModInitializer {
                     context.getSource().getClient().execute(() -> {
                         context.getSource().getClient().setScreen(new FeatherSettingsScreen(null));
                     });
-                    context.getSource().sendFeedback(Text.of("Opening Feather Settings..."));
+                    context.getSource().sendFeedback(Text.of("Opening Hollow Settings..."));
                     return 1;
                 })
             );

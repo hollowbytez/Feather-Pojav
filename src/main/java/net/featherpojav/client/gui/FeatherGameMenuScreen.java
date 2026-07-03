@@ -26,7 +26,7 @@ public class FeatherGameMenuScreen extends Screen {
     private final List<BottomWidget> bottomButtons = new ArrayList<>();
 
     public FeatherGameMenuScreen(Screen parent) {
-        super(Text.of("Feather Game Menu"));
+        super(Text.of("Hollow Game Menu"));
         this.parent = parent;
     }
 
@@ -74,7 +74,7 @@ public class FeatherGameMenuScreen extends Screen {
 
         // 1. Center Menu Buttons
         buttons.add(new MenuButton("◀", "Back to Game", false, () -> this.close()));
-        buttons.add(new MenuButton("🪶", "Feather Settings", false, () -> {
+        buttons.add(new MenuButton("🪶", "Hollow Settings", false, () -> {
             if (this.client != null) this.client.setScreen(new FeatherSettingsScreen(this));
         }));
 
@@ -146,13 +146,13 @@ public class FeatherGameMenuScreen extends Screen {
         // Draw slightly darkened transparent background
         context.fill(0, 0, this.width, this.height, 0x88000000);
 
-        // --- Render Left Side Feather Logo Watermark ---
+        // --- Render Left Side Hollow Logo Watermark ---
         int leftAlign = 20;
         int bottomAlign = this.height - 20;
         
-        // Render Feather Logo Texture (translucent white)
+        // Render Hollow Logo Texture (translucent white)
         Identifier logoId = Identifier.of("featherpojav", "icon.png");
-        context.drawTexture(logoId, 25, this.height / 2 - 80, 0.0f, 0.0f, 160, 160, 500, 500);
+        context.drawTexture(logoId, 25, this.height / 2 - 80, 0.0f, 0.0f, 160, 160, 1024, 1024);
 
         // Render scattered crosses "+"
         context.drawText(this.textRenderer, "+", 40, this.height / 2 - 120, 0x30FFFFFF, false);
