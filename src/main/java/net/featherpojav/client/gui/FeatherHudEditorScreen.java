@@ -17,17 +17,22 @@ public class FeatherHudEditorScreen extends Screen {
         java.util.function.IntSupplier getY;
         java.util.function.IntConsumer setY;
         java.util.function.BooleanSupplier isEnabled;
+        java.util.function.DoubleSupplier getScale;
+        java.util.function.DoubleConsumer setScale;
         int width;
         int height;
 
         HudElement(String name, java.util.function.IntSupplier getX, java.util.function.IntConsumer setX,
                    java.util.function.IntSupplier getY, java.util.function.IntConsumer setY,
+                   java.util.function.DoubleSupplier getScale, java.util.function.DoubleConsumer setScale,
                    java.util.function.BooleanSupplier isEnabled, int width, int height) {
             this.name = name;
             this.getX = getX;
             this.setX = setX;
             this.getY = getY;
             this.setY = setY;
+            this.getScale = getScale;
+            this.setScale = setScale;
             this.isEnabled = isEnabled;
             this.width = width;
             this.height = height;
@@ -44,28 +49,39 @@ public class FeatherHudEditorScreen extends Screen {
         this.parent = parent;
     }
     
+    private HudElement createElem(String name, int defWidth, int defHeight) {
+        return new HudElement(name,
+            () -> (int) HollowHudConfig.get(name).x,
+            (x) -> HollowHudConfig.get(name).x = x,
+            () -> (int) HollowHudConfig.get(name).y,
+            (y) -> HollowHudConfig.get(name).y = y,
+            () -> HollowHudConfig.get(name).scale,
+            (s) -> HollowHudConfig.get(name).scale = (float) s,
+            () -> HollowHudConfig.get(name).enabled,
+            defWidth, defHeight);
+    }
+
     @Override
     protected void init() {
-        FeatherConfig cfg = FeatherConfig.INSTANCE;
         elements = new HudElement[]{
-            new HudElement("Keystrokes", () -> cfg.keystrokesX, (x) -> cfg.keystrokesX = x, () -> cfg.keystrokesY, (y) -> cfg.keystrokesY = y, () -> cfg.keystrokes, 60, 60),
-            new HudElement("Armor HUD", () -> cfg.armorHUDX, (x) -> cfg.armorHUDX = x, () -> cfg.armorHUDY, (y) -> cfg.armorHUDY = y, () -> cfg.armorHUD, cfg.armorHUDVertical ? 22 : 90, cfg.armorHUDVertical ? 90 : 22),
-            new HudElement("Potion HUD", () -> cfg.potionHUDX, (x) -> cfg.potionHUDX = x, () -> cfg.potionHUDY, (y) -> cfg.potionHUDY = y, () -> cfg.potionHUD, 100, 40),
-            new HudElement("Coordinates", () -> cfg.coordHUDX, (x) -> cfg.coordHUDX = x, () -> cfg.coordHUDY, (y) -> cfg.coordHUDY = y, () -> cfg.coordHUD, 120, 26),
-            new HudElement("Direction HUD", () -> cfg.directionHUDX, (x) -> cfg.directionHUDX = x, () -> cfg.directionHUDY, (y) -> cfg.directionHUDY = y, () -> cfg.directionHUD, 160, 20),
-            new HudElement("FPS HUD", () -> cfg.fpsHUDX, (x) -> cfg.fpsHUDX = x, () -> cfg.fpsHUDY, (y) -> cfg.fpsHUDY = y, () -> cfg.fpsHUD, 50, 14),
-            new HudElement("Combo Display", () -> cfg.comboDisplayX, (x) -> cfg.comboDisplayX = x, () -> cfg.comboDisplayY, (y) -> cfg.comboDisplayY = y, () -> cfg.comboDisplay, 65, 14),
-            new HudElement("Ping Display", () -> cfg.pingDisplayX, (x) -> cfg.pingDisplayX = x, () -> cfg.pingDisplayY, (y) -> cfg.pingDisplayY = y, () -> cfg.pingDisplay, 60, 14),
-            new HudElement("Playtime", () -> cfg.playtimeX, (x) -> cfg.playtimeX = x, () -> cfg.playtimeY, (y) -> cfg.playtimeY = y, () -> cfg.playtime, 100, 14),
-            new HudElement("Reach Display", () -> cfg.reachDisplayX, (x) -> cfg.reachDisplayX = x, () -> cfg.reachDisplayY, (y) -> cfg.reachDisplayY = y, () -> cfg.reachDisplay, 70, 14),
-            new HudElement("Server Address", () -> cfg.serverAddressX, (x) -> cfg.serverAddressX = x, () -> cfg.serverAddressY, (y) -> cfg.serverAddressY = y, () -> cfg.serverAddress, 110, 14),
-            new HudElement("Speed Meter", () -> cfg.speedMeterX, (x) -> cfg.speedMeterX = x, () -> cfg.speedMeterY, (y) -> cfg.speedMeterY = y, () -> cfg.speedMeter, 85, 14),
-            new HudElement("Stopwatch", () -> cfg.stopwatchX, (x) -> cfg.stopwatchX = x, () -> cfg.stopwatchY, (y) -> cfg.stopwatchY = y, () -> cfg.stopwatch, 95, 14),
-            new HudElement("Item Counter", () -> cfg.itemCounterX, (x) -> cfg.itemCounterX = x, () -> cfg.itemCounterY, (y) -> cfg.itemCounterY = y, () -> cfg.itemCounter, 65, 14),
-            new HudElement("Pack Display", () -> cfg.packDisplayX, (x) -> cfg.packDisplayX = x, () -> cfg.packDisplayY, (y) -> cfg.packDisplayY = y, () -> cfg.packDisplay, 110, 14),
-            new HudElement("Target HUD", () -> cfg.targetHudX, (x) -> cfg.targetHudX = x, () -> cfg.targetHudY, (y) -> cfg.targetHudY = y, () -> cfg.damageIndicator, 120, 36),
-            new HudElement("Totem Counter", () -> cfg.totemCounterX, (x) -> cfg.totemCounterX = x, () -> cfg.totemCounterY, (y) -> cfg.totemCounterY = y, () -> cfg.totemCounter, 65, 14),
-            new HudElement("Saturation HUD", () -> cfg.saturationHUDX, (x) -> cfg.saturationHUDX = x, () -> cfg.saturationHUDY, (y) -> cfg.saturationHUDY = y, () -> cfg.saturationHUD, 80, 14)
+            createElem("Keystrokes", 60, 60),
+            createElem("Armor HUD", 90, 22),
+            createElem("Potion HUD", 100, 40),
+            createElem("Coordinates", 120, 26),
+            createElem("Direction HUD", 160, 20),
+            createElem("FPS HUD", 50, 14),
+            createElem("Combo Display", 65, 14),
+            createElem("Ping Display", 60, 14),
+            createElem("Playtime", 100, 14),
+            createElem("Reach Display", 70, 14),
+            createElem("Server Address", 110, 14),
+            createElem("Speed Meter", 85, 14),
+            createElem("Stopwatch", 95, 14),
+            createElem("Item Counter", 65, 14),
+            createElem("Pack Display", 110, 14),
+            createElem("Target HUD", 120, 36),
+            createElem("Totem Counter", 65, 14),
+            createElem("Saturation HUD", 80, 14)
         };
         
         // Return button
@@ -90,13 +106,14 @@ public class FeatherHudEditorScreen extends Screen {
             
             int x = el.getX.getAsInt();
             int y = el.getY.getAsInt();
-            int w = el.width;
-            int h = el.height;
+            double scale = el.getScale.getAsDouble();
+            int w = (int) (el.width * scale);
+            int h = (int) (el.height * scale);
             
             boolean isHovered = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
             boolean isDragged = el == draggedElement;
             
-            // Render bounding box with active status colors (purple for dragging, white/grey for normal)
+            // Render bounding box with active status colors
             int borderColor = isDragged ? 0xFF9C27B0 : (isHovered ? 0xFFBA68C8 : 0xAA777777);
             int boxBgColor = isDragged ? 0x409C27B0 : (isHovered ? 0x20BA68C8 : 0x10FFFFFF);
             
@@ -104,7 +121,11 @@ public class FeatherHudEditorScreen extends Screen {
             context.drawBorder(x, y, w, h, borderColor);
             
             // Element label inside the box
-            context.drawText(this.textRenderer, el.name, x + 3, y + 3, 0xFFFFFFFF, true);
+            context.getMatrices().push();
+            context.getMatrices().translate(x + 3, y + 3, 0);
+            context.getMatrices().scale((float)Math.min(1.0, scale), (float)Math.min(1.0, scale), 1f);
+            context.drawText(this.textRenderer, el.name, 0, 0, 0xFFFFFFFF, true);
+            context.getMatrices().pop();
         }
         
         super.render(context, mouseX, mouseY, delta);
@@ -122,8 +143,9 @@ public class FeatherHudEditorScreen extends Screen {
             
             int x = el.getX.getAsInt();
             int y = el.getY.getAsInt();
-            int w = el.width;
-            int h = el.height;
+            double scale = el.getScale.getAsDouble();
+            int w = (int) (el.width * scale);
+            int h = (int) (el.height * scale);
             
             if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
                 draggedElement = el;
@@ -172,14 +194,37 @@ public class FeatherHudEditorScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (draggedElement != null) {
             draggedElement = null;
-            FeatherConfig.save();
+            HollowHudConfig.save();
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
     
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double hAmt, double vAmt) {
+        for (HudElement el : elements) {
+            if (!el.isEnabled.getAsBoolean()) continue;
+
+            int x = el.getX.getAsInt();
+            int y = el.getY.getAsInt();
+            double scale = el.getScale.getAsDouble();
+            int w = (int) (el.width * scale);
+            int h = (int) (el.height * scale);
+
+            if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
+                double newScale = scale + (vAmt * 0.1);
+                if (newScale < 0.5) newScale = 0.5;
+                if (newScale > 3.0) newScale = 3.0;
+                el.setScale.accept(newScale);
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, hAmt, vAmt);
+    }
+
+    @Override
     public void close() {
+        HollowHudConfig.save();
         if (this.client != null) {
             this.client.setScreen(parent);
         }

@@ -1,6 +1,7 @@
 package net.featherpojav.client.hud;
 
 import net.featherpojav.client.config.FeatherConfig;
+import net.featherpojav.client.config.HollowHudConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -122,9 +123,14 @@ public class FeatherHudRenderer {
         updateCPS(client);
 
         // 1. Keystrokes & CPS
-        if (cfg.keystrokes) {
-            int kx = cfg.keystrokesX;
-            int ky = cfg.keystrokesY;
+        if (HollowHudConfig.get("Keystrokes").enabled) {
+            int kx = (int) HollowHudConfig.get("Keystrokes").x;
+            int ky = (int) HollowHudConfig.get("Keystrokes").y;
+            float scale = HollowHudConfig.get("Keystrokes").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(kx, ky, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            kx = 0; ky = 0;
             
             boolean w = client.options.forwardKey.isPressed();
             boolean a = client.options.leftKey.isPressed();
@@ -146,12 +152,18 @@ public class FeatherHudRenderer {
             
             // Spacebar
             drawKey(context, tr, "------", kx, ky + 60, 60, 10, space);
+            context.getMatrices().pop();
         }
 
         // 2. Coordinates HUD
-        if (cfg.coordHUD) {
-            int cx = cfg.coordHUDX;
-            int cy = cfg.coordHUDY;
+        if (HollowHudConfig.get("Coordinates").enabled) {
+            int cx = (int) HollowHudConfig.get("Coordinates").x;
+            int cy = (int) HollowHudConfig.get("Coordinates").y;
+            float scale = HollowHudConfig.get("Coordinates").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(cx, cy, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            cx = 0; cy = 0;
             
             context.fill(cx, cy, cx + 120, cy + 26, 0x80000000);
             context.fill(cx, cy, cx + 2, cy + 26, cfg.themeColor);
@@ -169,22 +181,34 @@ public class FeatherHudRenderer {
             else if (yaw >= 225 && yaw < 315) direction = "E (+X)";
             
             context.drawText(tr, "Facing: " + direction, cx + 6, cy + 14, 0xFF888888, false);
+            context.getMatrices().pop();
         }
 
         // 3. FPS HUD
-        if (cfg.fpsHUD) {
-            int fx = cfg.fpsHUDX;
-            int fy = cfg.fpsHUDY;
+        if (HollowHudConfig.get("FPS HUD").enabled) {
+            int fx = (int) HollowHudConfig.get("FPS HUD").x;
+            int fy = (int) HollowHudConfig.get("FPS HUD").y;
+            float scale = HollowHudConfig.get("FPS HUD").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(fx, fy, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            fx = 0; fy = 0;
             
             context.fill(fx, fy, fx + 50, fy + 14, 0x80000000);
             context.fill(fx, fy, fx + 2, fy + 14, cfg.themeColor);
             context.drawText(tr, client.getCurrentFps() + " FPS", fx + 6, fy + 3, 0xFFFFFFFF, false);
+            context.getMatrices().pop();
         }
 
         // 4. Direction HUD / Compass Scale
-        if (cfg.directionHUD) {
-            int dx = cfg.directionHUDX;
-            int dy = cfg.directionHUDY;
+        if (HollowHudConfig.get("Direction HUD").enabled) {
+            int dx = (int) HollowHudConfig.get("Direction HUD").x;
+            int dy = (int) HollowHudConfig.get("Direction HUD").y;
+            float scale = HollowHudConfig.get("Direction HUD").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(dx, dy, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            dx = 0; dy = 0;
             int width = 160;
             int height = 18;
             
@@ -220,12 +244,18 @@ public class FeatherHudRenderer {
                     context.drawCenteredTextWithShadow(tr, String.valueOf(angle), posX, dy + 4, 0xFF888888);
                 }
             }
+            context.getMatrices().pop();
         }
 
         // 5. Armor HUD & Armor Status
-        if (cfg.armorHUD) {
-            int ax = cfg.armorHUDX;
-            int ay = cfg.armorHUDY;
+        if (HollowHudConfig.get("Armor HUD").enabled) {
+            int ax = (int) HollowHudConfig.get("Armor HUD").x;
+            int ay = (int) HollowHudConfig.get("Armor HUD").y;
+            float scale = HollowHudConfig.get("Armor HUD").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(ax, ay, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            ax = 0; ay = 0;
             
             List<ItemStack> items = new ArrayList<>();
             items.add(client.player.getMainHandStack());
@@ -253,12 +283,18 @@ public class FeatherHudRenderer {
                 
                 offset += cfg.armorHUDVertical ? 18 : 36;
             }
+            context.getMatrices().pop();
         }
 
         // 6. Potion HUD
-        if (cfg.potionHUD) {
-            int px = cfg.potionHUDX;
-            int py = cfg.potionHUDY;
+        if (HollowHudConfig.get("Potion HUD").enabled) {
+            int px = (int) HollowHudConfig.get("Potion HUD").x;
+            int py = (int) HollowHudConfig.get("Potion HUD").y;
+            float scale = HollowHudConfig.get("Potion HUD").scale;
+            context.getMatrices().push();
+            context.getMatrices().translate(px, py, 0);
+            context.getMatrices().scale(scale, scale, 1f);
+            px = 0; py = 0;
             
             Collection<StatusEffectInstance> effects = client.player.getStatusEffects();
             int offsetY = 0;
@@ -286,10 +322,11 @@ public class FeatherHudRenderer {
                 context.drawText(tr, fullText, px + 6, py + offsetY + 3, 0xFFFFFFFF, false);
                 offsetY += 16;
             }
+            context.getMatrices().pop();
         }
 
         // 6a. Armor Bar
-        if (cfg.armorBar) {
+        if (HollowHudConfig.get("Armor Bar").enabled) {
             int armorValue = client.player.getArmor();
             if (armorValue > 0) {
                 int barX = client.getWindow().getScaledWidth() / 2 - 91;

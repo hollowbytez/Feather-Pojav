@@ -1,6 +1,7 @@
 package net.featherpojav.client.gui;
 
 import net.featherpojav.client.config.FeatherConfig;
+import net.featherpojav.client.config.HollowHudConfig;
 import net.featherpojav.client.FeatherPojavModClient;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
@@ -128,36 +129,37 @@ public class FeatherSettingsScreen extends Screen {
         this.searchField.setUneditableColor(TEXT_GRAY);
         this.addSelectableChild(this.searchField);
 
+        HollowHudConfig.load();
         cards.clear();
         FeatherConfig cfg = FeatherConfig.INSTANCE;
 
         // --- HUD Category ---
-        cards.add(new ModCard("Armor Bar", "🛡", Category.HUD, () -> cfg.armorBar, (v) -> cfg.armorBar = v));
-        cards.add(new ModCard("Armor HUD", "🛡", Category.HUD, () -> cfg.armorHUD, (v) -> cfg.armorHUD = v));
-        cards.add(new ModCard("Armor Status", "🛡", Category.HUD, () -> cfg.armorStatus, (v) -> cfg.armorStatus = v));
-        cards.add(new ModCard("Boss Bar", "👿", Category.HUD, () -> cfg.bossBar, (v) -> cfg.bossBar = v));
-        cards.add(new ModCard("Combo Display", "⚔", Category.HUD, () -> cfg.comboDisplay, (v) -> cfg.comboDisplay = v));
-        cards.add(new ModCard("Coordinates", "📍", Category.HUD, () -> cfg.coordHUD, (v) -> cfg.coordHUD = v));
-        cards.add(new ModCard("Damage Indicator", "💔", Category.HUD, () -> cfg.damageIndicator, (v) -> cfg.damageIndicator = v));
-        cards.add(new ModCard("Direction HUD", "🧭", Category.HUD, () -> cfg.directionHUD, (v) -> cfg.directionHUD = v));
-        cards.add(new ModCard("FPS HUD", "📊", Category.HUD, () -> cfg.fpsHUD, (v) -> cfg.fpsHUD = v));
-        cards.add(new ModCard("Hearts", "❤", Category.HUD, () -> cfg.hearts, (v) -> cfg.hearts = v));
-        cards.add(new ModCard("Item Counter", "📦", Category.HUD, () -> cfg.itemCounter, (v) -> cfg.itemCounter = v));
-        cards.add(new ModCard("Keystrokes", "⌨", Category.HUD, () -> cfg.keystrokes, (v) -> cfg.keystrokes = v));
-        cards.add(new ModCard("Pack Display", "🗂", Category.HUD, () -> cfg.packDisplay, (v) -> cfg.packDisplay = v));
-        cards.add(new ModCard("Ping Display", "📶", Category.HUD, () -> cfg.pingDisplay, (v) -> cfg.pingDisplay = v));
-        cards.add(new ModCard("Playtime", "⏳", Category.HUD, () -> cfg.playtime, (v) -> cfg.playtime = v));
-        cards.add(new ModCard("Potion HUD", "🧪", Category.HUD, () -> cfg.potionHUD, (v) -> cfg.potionHUD = v));
-        cards.add(new ModCard("Reach Display", "📏", Category.HUD, () -> cfg.reachDisplay, (v) -> cfg.reachDisplay = v));
-        cards.add(new ModCard("Saturation HUD", "🥩", Category.HUD, () -> cfg.saturationHUD, (v) -> cfg.saturationHUD = v));
-        cards.add(new ModCard("Scoreboard", "📋", Category.HUD, () -> cfg.scoreboard, (v) -> cfg.scoreboard = v));
-        cards.add(new ModCard("Server IP", "🌐", Category.HUD, () -> cfg.serverAddress, (v) -> cfg.serverAddress = v));
-        cards.add(new ModCard("Speed Meter", "👟", Category.HUD, () -> cfg.speedMeter, (v) -> cfg.speedMeter = v));
-        cards.add(new ModCard("Stopwatch", "⏱", Category.HUD, () -> cfg.stopwatch, (v) -> cfg.stopwatch = v)
+        cards.add(new ModCard("Armor Bar", "🛡", Category.HUD, () -> HollowHudConfig.get("Armor Bar").enabled, (v) -> { HollowHudConfig.get("Armor Bar").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Armor HUD", "🛡", Category.HUD, () -> HollowHudConfig.get("Armor HUD").enabled, (v) -> { HollowHudConfig.get("Armor HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Armor Status", "🛡", Category.HUD, () -> HollowHudConfig.get("Armor Status").enabled, (v) -> { HollowHudConfig.get("Armor Status").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Boss Bar", "👿", Category.HUD, () -> HollowHudConfig.get("Boss Bar").enabled, (v) -> { HollowHudConfig.get("Boss Bar").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Combo Display", "⚔", Category.HUD, () -> HollowHudConfig.get("Combo Display").enabled, (v) -> { HollowHudConfig.get("Combo Display").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Coordinates", "📍", Category.HUD, () -> HollowHudConfig.get("Coordinates").enabled, (v) -> { HollowHudConfig.get("Coordinates").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Damage Indicator", "💔", Category.HUD, () -> HollowHudConfig.get("Target HUD").enabled, (v) -> { HollowHudConfig.get("Target HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Direction HUD", "🧭", Category.HUD, () -> HollowHudConfig.get("Direction HUD").enabled, (v) -> { HollowHudConfig.get("Direction HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("FPS HUD", "📊", Category.HUD, () -> HollowHudConfig.get("FPS HUD").enabled, (v) -> { HollowHudConfig.get("FPS HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Hearts", "❤", Category.HUD, () -> HollowHudConfig.get("Hearts").enabled, (v) -> { HollowHudConfig.get("Hearts").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Item Counter", "📦", Category.HUD, () -> HollowHudConfig.get("Item Counter").enabled, (v) -> { HollowHudConfig.get("Item Counter").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Keystrokes", "⌨", Category.HUD, () -> HollowHudConfig.get("Keystrokes").enabled, (v) -> { HollowHudConfig.get("Keystrokes").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Pack Display", "🗂", Category.HUD, () -> HollowHudConfig.get("Pack Display").enabled, (v) -> { HollowHudConfig.get("Pack Display").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Ping Display", "📶", Category.HUD, () -> HollowHudConfig.get("Ping Display").enabled, (v) -> { HollowHudConfig.get("Ping Display").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Playtime", "⏳", Category.HUD, () -> HollowHudConfig.get("Playtime").enabled, (v) -> { HollowHudConfig.get("Playtime").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Potion HUD", "🧪", Category.HUD, () -> HollowHudConfig.get("Potion HUD").enabled, (v) -> { HollowHudConfig.get("Potion HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Reach Display", "📏", Category.HUD, () -> HollowHudConfig.get("Reach Display").enabled, (v) -> { HollowHudConfig.get("Reach Display").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Saturation HUD", "🥩", Category.HUD, () -> HollowHudConfig.get("Saturation HUD").enabled, (v) -> { HollowHudConfig.get("Saturation HUD").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Scoreboard", "📋", Category.HUD, () -> HollowHudConfig.get("Scoreboard").enabled, (v) -> { HollowHudConfig.get("Scoreboard").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Server IP", "🌐", Category.HUD, () -> HollowHudConfig.get("Server Address").enabled, (v) -> { HollowHudConfig.get("Server Address").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Speed Meter", "👟", Category.HUD, () -> HollowHudConfig.get("Speed Meter").enabled, (v) -> { HollowHudConfig.get("Speed Meter").enabled = v; HollowHudConfig.save(); }));
+        cards.add(new ModCard("Stopwatch", "⏱", Category.HUD, () -> HollowHudConfig.get("Stopwatch").enabled, (v) -> { HollowHudConfig.get("Stopwatch").enabled = v; HollowHudConfig.save(); })
             .withConfig(() -> {
                 if (this.client != null) this.client.setScreen(new FeatherKeybindSettingScreen(this, "Stopwatch", FeatherPojavModClient.stopwatchKey));
             }));
-        cards.add(new ModCard("Totem Counter", "🪶", Category.HUD, () -> cfg.totemCounter, (v) -> cfg.totemCounter = v));
+        cards.add(new ModCard("Totem Counter", "🪶", Category.HUD, () -> HollowHudConfig.get("Totem Counter").enabled, (v) -> { HollowHudConfig.get("Totem Counter").enabled = v; HollowHudConfig.save(); }));
 
         // --- PvP Category ---
         cards.add(new ModCard("AutoGG", "🗣", Category.PVP, () -> cfg.autoGG, (v) -> cfg.autoGG = v));
@@ -469,6 +471,30 @@ public class FeatherSettingsScreen extends Screen {
         if (mouseX >= clX && mouseX <= clX + clS && mouseY >= clY && mouseY <= clY + clS) {
             this.close();
             return true;
+        }
+
+        // Section icons
+        int icoS = navBarH - 6;
+        int mmX = panelX + icoS + 10;
+        int mmW = 66;
+        int secX = mmX + mmW + 8;
+        int btnS = navBarH - 8;
+        for (int i = 0; i < 5; i++) {
+            if (mouseX >= secX && mouseX <= secX + btnS + 4 && mouseY >= navY + 3 && mouseY <= navY + 3 + btnS + 2) {
+                if (i == 0) { // Settings/Gear
+                    if (this.client != null) this.client.setScreen(new FeatherGlobalSettingsScreen(this));
+                } else if (i == 1) { // Clothes/Cosmetics
+                    if (this.client != null) this.client.setScreen(new FeatherCosmeticsScreen(this));
+                } else if (i == 2) { // Monitor/HUD Layout
+                    if (this.client != null) this.client.setScreen(new FeatherHudEditorScreen(this));
+                } else if (i == 3) { // Gamepad/Keybinds
+                    if (this.client != null) this.client.setScreen(new FeatherMacrosScreen(this));
+                } else if (i == 4) { // Friends/Profiles
+                    if (this.client != null) this.client.setScreen(new FeatherProfilesScreen(this));
+                }
+                return true;
+            }
+            secX += btnS + 8;
         }
 
         // Search field
