@@ -19,9 +19,6 @@ public abstract class MinecraftClientMixin {
         if (screen instanceof TitleScreen && !(screen instanceof FeatherHomeScreen)) {
             this.setScreen(new FeatherHomeScreen());
             ci.cancel();
-        } else if (screen instanceof net.minecraft.client.gui.screen.GameMenuScreen && !(screen instanceof net.featherpojav.client.gui.FeatherGameMenuScreen)) {
-            this.setScreen(new net.featherpojav.client.gui.FeatherGameMenuScreen(screen));
-            ci.cancel();
         }
     }
 }

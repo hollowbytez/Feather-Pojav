@@ -16,7 +16,8 @@
 		"LightmapTextureManagerMixin",
 		"LightmapTextureManagerAccessor",
 		"InGameOverlayRendererMixin",
-		"ClientPlayerInteractionManagerMixin"
+		"ClientPlayerInteractionManagerMixin",
+		"GameMenuScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
