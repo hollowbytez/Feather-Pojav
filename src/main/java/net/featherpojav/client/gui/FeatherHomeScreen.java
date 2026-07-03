@@ -88,13 +88,14 @@ public class FeatherHomeScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Fix white hazy mask by resetting color and enabling blend cleanly
+        // Fix white hazy mask by cleaning state
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableBlend();
         
         this.panoramaRenderer.render(context, this.width, this.height, 1.0f, delta);
         
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         // Crisp dark gradient fade overlay
         context.fillGradient(0, 0, this.width, this.height, 0xA0000000, 0xE0000000);
 
@@ -175,7 +176,8 @@ public class FeatherHomeScreen extends Screen {
             RenderUtils.drawRoundedRect(context.getMatrices(), leftX, buttonY, buttonWidth, buttonHeight, 8, bg);
             RenderUtils.drawRoundedOutline(context.getMatrices(), leftX, buttonY, buttonWidth, buttonHeight, 8, 1.5f, border);
             
-            context.drawCenteredTextWithShadow(this.textRenderer, btn.label, this.width / 2, buttonY + 11, 0xFFFFFFFF);
+            int textY = buttonY + (buttonHeight - this.textRenderer.fontHeight) / 2 + 1;
+            context.drawCenteredTextWithShadow(this.textRenderer, btn.label, this.width / 2, textY, 0xFFFFFFFF);
             
             buttonY += 40;
         }

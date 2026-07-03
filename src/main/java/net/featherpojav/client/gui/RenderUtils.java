@@ -28,44 +28,52 @@ public class RenderUtils {
         BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         
         // Center block
-        bufferbuilder.vertex(matrix, x + radius, y, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + radius, y + height, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + width - radius, y + height, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + width - radius, y, 0).color(f1, f2, f3, f);
+        bufferbuilder.vertex(matrix, x + radius, y, 0).color(color);
+        bufferbuilder.vertex(matrix, x + radius, y + height, 0).color(color);
+        bufferbuilder.vertex(matrix, x + width - radius, y + height, 0).color(color);
+        bufferbuilder.vertex(matrix, x + width - radius, y, 0).color(color);
         
         // Left block
-        bufferbuilder.vertex(matrix, x, y + radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x, y + height - radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + radius, y + height - radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + radius, y + radius, 0).color(f1, f2, f3, f);
+        bufferbuilder.vertex(matrix, x, y + radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x, y + height - radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x + radius, y + height - radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x + radius, y + radius, 0).color(color);
         
         // Right block
-        bufferbuilder.vertex(matrix, x + width - radius, y + radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + width - radius, y + height - radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + width, y + height - radius, 0).color(f1, f2, f3, f);
-        bufferbuilder.vertex(matrix, x + width, y + radius, 0).color(f1, f2, f3, f);
+        bufferbuilder.vertex(matrix, x + width - radius, y + radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x + width - radius, y + height - radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x + width, y + height - radius, 0).color(color);
+        bufferbuilder.vertex(matrix, x + width, y + radius, 0).color(color);
         
         net.minecraft.client.render.BufferRenderer.drawWithGlobalProgram(bufferbuilder.end());
 
-        // Draw the 4 rounded corners using triangle fans
-        drawCorner(matrix, x + radius, y + radius, radius, 180, 270, f1, f2, f3, f); // Top-Left
-        drawCorner(matrix, x + width - radius, y + radius, radius, 270, 360, f1, f2, f3, f); // Top-Right
-        drawCorner(matrix, x + width - radius, y + height - radius, radius, 0, 90, f1, f2, f3, f); // Bottom-Right
-        drawCorner(matrix, x + radius, y + height - radius, radius, 90, 180, f1, f2, f3, f); // Bottom-Left
+        // Draw the 4 rounded corners using triangles
+        drawCorner(matrix, x + radius, y + radius, radius, 180, 270, color); // Top-Left
+        drawCorner(matrix, x + width - radius, y + radius, radius, 270, 360, color); // Top-Right
+        drawCorner(matrix, x + width - radius, y + height - radius, radius, 0, 90, color); // Bottom-Right
+        drawCorner(matrix, x + radius, y + height - radius, radius, 90, 180, color); // Bottom-Left
 
         RenderSystem.disableBlend();
     }
 
-    private static void drawCorner(Matrix4f matrix, float cx, float cy, float r, int startAngle, int endAngle, float r1, float g1, float b1, float a1) {
+    private static void drawCorner(Matrix4f matrix, float cx, float cy, float r, int startAngle, int endAngle, int color) {
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+        BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
         
-        bufferbuilder.vertex(matrix, cx, cy, 0).color(r1, g1, b1, a1);
-        for (int i = startAngle; i <= endAngle; i += 5) {
+        float lastVx = cx + (float) Math.cos(Math.toRadians(startAngle)) * r;
+        float lastVy = cy + (float) Math.sin(Math.toRadians(startAngle)) * r;
+
+        for (int i = startAngle + 5; i <= endAngle; i += 5) {
             float rad = (float) Math.toRadians(i);
             float vx = cx + (float) Math.cos(rad) * r;
             float vy = cy + (float) Math.sin(rad) * r;
-            bufferbuilder.vertex(matrix, vx, vy, 0).color(r1, g1, b1, a1);
+            
+            bufferbuilder.vertex(matrix, cx, cy, 0).color(color);
+            bufferbuilder.vertex(matrix, lastVx, lastVy, 0).color(color);
+            bufferbuilder.vertex(matrix, vx, vy, 0).color(color);
+            
+            lastVx = vx;
+            lastVy = vy;
         }
         net.minecraft.client.render.BufferRenderer.drawWithGlobalProgram(bufferbuilder.end());
     }
@@ -88,22 +96,22 @@ public class RenderUtils {
         // Top-Left corner to Top-Right corner
         for (int i = 180; i <= 270; i += 5) {
             float rad = (float) Math.toRadians(i);
-            bufferbuilder.vertex(matrix, x + radius + (float)Math.cos(rad) * radius, y + radius + (float)Math.sin(rad) * radius, 0).color(f1, f2, f3, f);
+            bufferbuilder.vertex(matrix, x + radius + (float)Math.cos(rad) * radius, y + radius + (float)Math.sin(rad) * radius, 0).color(color);
         }
         for (int i = 270; i <= 360; i += 5) {
             float rad = (float) Math.toRadians(i);
-            bufferbuilder.vertex(matrix, x + width - radius + (float)Math.cos(rad) * radius, y + radius + (float)Math.sin(rad) * radius, 0).color(f1, f2, f3, f);
+            bufferbuilder.vertex(matrix, x + width - radius + (float)Math.cos(rad) * radius, y + radius + (float)Math.sin(rad) * radius, 0).color(color);
         }
         for (int i = 0; i <= 90; i += 5) {
             float rad = (float) Math.toRadians(i);
-            bufferbuilder.vertex(matrix, x + width - radius + (float)Math.cos(rad) * radius, y + height - radius + (float)Math.sin(rad) * radius, 0).color(f1, f2, f3, f);
+            bufferbuilder.vertex(matrix, x + width - radius + (float)Math.cos(rad) * radius, y + height - radius + (float)Math.sin(rad) * radius, 0).color(color);
         }
         for (int i = 90; i <= 180; i += 5) {
             float rad = (float) Math.toRadians(i);
-            bufferbuilder.vertex(matrix, x + radius + (float)Math.cos(rad) * radius, y + height - radius + (float)Math.sin(rad) * radius, 0).color(f1, f2, f3, f);
+            bufferbuilder.vertex(matrix, x + radius + (float)Math.cos(rad) * radius, y + height - radius + (float)Math.sin(rad) * radius, 0).color(color);
         }
         // Close the loop
-        bufferbuilder.vertex(matrix, x, y + radius, 0).color(f1, f2, f3, f);
+        bufferbuilder.vertex(matrix, x, y + radius, 0).color(color);
 
         net.minecraft.client.render.BufferRenderer.drawWithGlobalProgram(bufferbuilder.end());
         RenderSystem.lineWidth(1.0f);
