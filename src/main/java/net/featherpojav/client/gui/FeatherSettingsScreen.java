@@ -23,8 +23,8 @@ public class FeatherSettingsScreen extends Screen {
     private TextFieldWidget searchField;
 
     // ===== Exact color palette =====
-    private static final int BG_PANEL       = 0xFF141416;  // Solid opaque dark charcoal
-    private static final int BG_CARD        = 0xFF1F2026;  // Card background (lighter than panel)
+    private static final int BG_PANEL       = 0xD9141416;  // Translucent dark charcoal (85% opaque)
+    private static final int BG_CARD        = 0xE61F2026;  // Card background (90% opaque)
     private static final int ACCENT_RED     = 0xFFEB4040;  // Salmon red accent
     private static final int ENABLED_GREEN  = 0xFF226422;  // Enabled toggle
     private static final int ENABLED_GREEN_H= 0xFF2E8E2E;  // Enabled hover
@@ -33,7 +33,7 @@ public class FeatherSettingsScreen extends Screen {
     private static final int TEXT_WHITE     = 0xFFFFFFFF;  // Primary text
     private static final int TEXT_GRAY      = 0xFF8A8C96;  // Secondary text
     private static final int CLOSE_RED      = 0xFFBA2D2D;  // Close button
-    private static final int HEADER_BG      = 0xFF121214;  // Header/nav background
+    private static final int HEADER_BG      = 0xD9121214;  // Header/nav background
     private static final int ICON_BTN_BG    = 0xFF1A1A1E;  // Icon button background
     private static final int ICON_BTN_HOVER = 0xFF2A2B36;  // Icon button hover
     private static final int CARD_HOVER     = 0xFF262830;  // Card hover
@@ -80,23 +80,33 @@ public class FeatherSettingsScreen extends Screen {
     }
 
     // ===== Rounded rectangle helpers =====
-    // Simulates rounded corners by clipping 2px corners with background color
+    // True rounded rect for transparency (draws multiple rects, ignores cornerColor)
     private void fillRounded(DrawContext ctx, int x, int y, int w, int h, int color, int cornerColor, int r) {
-        ctx.fill(x, y, x + w, y + h, color);
-        if (r >= 2) {
-            // Top-left corner
-            ctx.fill(x, y, x + r, y + 1, cornerColor);
-            ctx.fill(x, y + 1, x + 1, y + r, cornerColor);
-            // Top-right corner
-            ctx.fill(x + w - r, y, x + w, y + 1, cornerColor);
-            ctx.fill(x + w - 1, y + 1, x + w, y + r, cornerColor);
-            // Bottom-left corner
-            ctx.fill(x, y + h - 1, x + r, y + h, cornerColor);
-            ctx.fill(x, y + h - r, x + 1, y + h - 1, cornerColor);
-            // Bottom-right corner
-            ctx.fill(x + w - r, y + h - 1, x + w, y + h, cornerColor);
-            ctx.fill(x + w - 1, y + h - r, x + w, y + h - 1, cornerColor);
+        if (r < 2) {
+            ctx.fill(x, y, x + w, y + h, color);
+            return;
         }
+        ctx.fill(x + r, y, x + w - r, y + h, color);
+        ctx.fill(x, y + r, x + r, y + h - r, color);
+        ctx.fill(x + w - r, y + r, x + w, y + h - r, color);
+        ctx.fill(x + 1, y + 1, x + 2, y + 2, color);
+        ctx.fill(x + w - 2, y + 1, x + w - 1, y + 2, color);
+        ctx.fill(x + 1, y + h - 2, x + 2, y + h - 1, color);
+        ctx.fill(x + w - 2, y + h - 2, x + w - 1, y + h - 1, color);
+    }
+    
+    private void fillRoundedTop(DrawContext ctx, int x, int y, int w, int h, int color, int r) {
+        ctx.fill(x, y + r, x + w, y + h, color);
+        ctx.fill(x + r, y, x + w - r, y + r, color);
+        ctx.fill(x + 1, y + 1, x + 2, y + 2, color);
+        ctx.fill(x + w - 2, y + 1, x + w - 1, y + 2, color);
+    }
+
+    private void fillRoundedBottom(DrawContext ctx, int x, int y, int w, int h, int color, int r) {
+        ctx.fill(x, y, x + w, y + h - r, color);
+        ctx.fill(x + r, y + h - r, x + w - r, y + h, color);
+        ctx.fill(x + 1, y + h - 2, x + 2, y + h - 1, color);
+        ctx.fill(x + w - 2, y + h - 2, x + w - 1, y + h - 1, color);
     }
 
     @Override
@@ -251,8 +261,9 @@ public class FeatherSettingsScreen extends Screen {
     // ============================================================
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // === FULLY OPAQUE dark background over game ===
-        context.fill(0, 0, this.width, this.height, 0xFF0A0A0C);
+        // === Transparent blurred background ===
+        super.renderBackground(context, mouseX, mouseY, delta);
+        context.fill(0, 0, this.width, this.height, 0x33000000);
 
         int cols = getCols();
         int pad = 8;
@@ -265,8 +276,8 @@ public class FeatherSettingsScreen extends Screen {
         int navY = panelY;
         int navBot = navY + navBarH;
 
-        // Nav bar background (solid opaque)
-        context.fill(panelX, navY, panelX + panelW, navBot, HEADER_BG);
+        // Nav bar background (translucent, top rounded)
+        fillRoundedTop(context, panelX, navY, panelW, navBarH, HEADER_BG, 4);
 
         // Feather icon (left)
         Identifier iconId = Identifier.of("featherpojav", "icon.png");
@@ -311,12 +322,10 @@ public class FeatherSettingsScreen extends Screen {
         fillRounded(context, clX, clY, clS, clS, clH ? 0xFFE53935 : CLOSE_RED, HEADER_BG, 2);
         context.drawCenteredTextWithShadow(this.textRenderer, "✕", clX + clS / 2, clY + (clS - 8) / 2, TEXT_WHITE);
 
-        // ====================================================
-        // MAIN PANEL BODY (solid opaque, below nav bar)
-        // ====================================================
+        // MAIN PANEL BODY (translucent, bottom rounded, below nav bar)
         int bodyY = navBot;
         int bodyH = panelH - navBarH;
-        context.fill(panelX, bodyY, panelX + panelW, bodyY + bodyH, BG_PANEL);
+        fillRoundedBottom(context, panelX, bodyY, panelW, bodyH, BG_PANEL, 4);
 
         // ====================================================
         // B. FILTER BAR (pill tabs + search)
@@ -561,7 +570,9 @@ public class FeatherSettingsScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {}
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderBackground(context, mouseX, mouseY, delta);
+    }
 
     @Override
     public void close() {
